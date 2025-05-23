@@ -1,0 +1,46 @@
+{
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@hookform/resolvers": "^3.3.4",
+    "@supabase/auth-ui-react": "^0.4.7",
+    "@supabase/auth-ui-shared": "^0.1.8",
+    "@supabase/supabase-js": "^2.49.5",
+    "bcryptjs": "^2.4.3",
+    "browser-image-compression": "^2.0.2",
+    "crypto-js": "^4.2.0",
+    "dotenv": "^16.5.0",
+    "exceljs": "^4.4.0",
+    "file-saver": "^2.0.5",
+    "libphonenumber-js": "^1.10.55",
+    "lucide-react": "^0.323.0",
+    "nanoid": "^5.0.6",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "react-hook-form": "^7.50.0",
+    "react-router-dom": "^6.22.0",
+    "zod": "^3.22.4"
+  },
+  "devDependencies": {
+    "@types/bcryptjs": "^2.4.6",
+    "@types/crypto-js": "^4.2.1",
+    "@types/react": "^18.2.55",
+    "@types/react-dom": "^18.2.19",
+    "@vitejs/plugin-react": "^4.2.0",
+    "autoprefixer": "^10.4.17",
+    "tailwindcss": "^3.4.1",
+    "typescript": "^5.3.3",
+    "vite": "^5.0.0"
+  },
+  "name": "project-7",
+  "description": "A secure internal web application for managing employee attendance and shop visits.",
+  "version": "1.0.0",
+  "main": "eslint.config.js",
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}

@@ -1,0 +1,141 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    font-family: 'Inter', system-ui, sans-serif;
+  }
+
+  body {
+    @apply text-gray-900 bg-gray-50;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-bold text-gray-900;
+  }
+
+  h1 {
+    @apply text-3xl md:text-4xl leading-tight;
+  }
+
+  h2 {
+    @apply text-2xl md:text-3xl leading-tight;
+  }
+
+  h3 {
+    @apply text-xl md:text-2xl leading-snug;
+  }
+}
+
+@layer components {
+  .btn {
+    @apply px-4 py-2 rounded-md font-medium transition duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2;
+  }
+
+  .btn-primary {
+    @apply btn bg-blue-900 text-white hover:bg-blue-800 focus:ring-blue-500;
+  }
+
+  .btn-secondary {
+    @apply btn bg-teal-600 text-white hover:bg-teal-500 focus:ring-teal-400;
+  }
+
+  .input-field {
+    @apply w-full px-3 py-2 rounded-md border border-gray-300 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent;
+  }
+
+  .card {
+    @apply bg-white rounded-lg shadow-md p-6 transition-all duration-300;
+  }
+
+  .form-group {
+    @apply mb-6;
+  }
+
+  .form-label {
+    @apply block text-sm font-medium text-gray-700 mb-1;
+  }
+
+  .error-message {
+    @apply text-red-600 text-sm mt-1;
+  }
+
+  .page-container {
+    @apply container mx-auto px-4 py-8 max-w-4xl;
+  }
+
+  .camera-container {
+    @apply relative w-full aspect-video bg-gray-900 rounded-lg overflow-hidden shadow-inner;
+  }
+
+  .camera-overlay {
+    @apply absolute inset-0 flex items-center justify-center bg-gray-900/90;
+  }
+
+  .image-preview {
+    @apply w-full h-full object-cover rounded-lg;
+  }
+
+  .navbar {
+    @apply bg-blue-900 text-white py-4 px-6 shadow-md;
+  }
+
+  .nav-link {
+    @apply text-white hover:text-blue-200 transition-colors duration-200;
+  }
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from { transform: translateY(20px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+.animate-fadeIn {
+  animation: fadeIn 0.5s ease-out;
+}
+
+.animate-slideUp {
+  animation: slideUp 0.5s ease-out;
+}
+
+/* Toast notifications */
+.toast {
+  @apply fixed right-4 bottom-4 p-4 rounded-md shadow-lg animate-slideUp;
+}
+
+.toast-success {
+  @apply bg-green-600 text-white;
+}
+
+.toast-error {
+  @apply bg-red-600 text-white;
+}
+
+.toast-info {
+  @apply bg-blue-600 text-white;
+}
+
+/* Camera UI */
+.camera-switch {
+  @apply absolute top-4 right-4 bg-white/80 p-3 rounded-full hover:bg-white transition-colors;
+  width: 48px;
+  height: 48px;
+}
+
+.camera-capture {
+  @apply absolute bottom-4 left-1/2 -translate-x-1/2 bg-white text-gray-900 rounded-full flex items-center justify-center hover:bg-gray-100 transition-colors;
+  width: 64px;
+  height: 64px;
+}
+
+.camera-capture::after {
+  content: '';
+  @apply absolute inset-2 bg-gray-900 rounded-full;
+}
