@@ -25,3 +25,32 @@ dist-ssr
 .bolt
 .env
 .gitignore
+# Environment
+.env
+.env.*
+
+# Node & Build
+node_modules/
+dist/
+build/
+
+# System
+.DS_Store
+.vscode/
+.idea/
+
+# Logs
+*.log
+*.tmp
+
+# Supabase
+supabase/.env
+supabase/.temp/
+
+# Database/Export
+*.sqlite
+*.csv
+*.xls
+*.xlsx
+*.sql
+*.bak
