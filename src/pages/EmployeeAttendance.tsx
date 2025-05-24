@@ -14,6 +14,7 @@ const EmployeeAttendance: React.FC = () => {
   const [location, setLocation] = useState<{ latitude: number; longitude: number } | null>(null);
   const [kilometers, setKilometers] = useState<string>('');
   const [loading, setLoading] = useState<boolean>(false);
+  const [uploading, setUploading] = useState<boolean>(false);
   const [formErrors, setFormErrors] = useState<{ photo?: string; location?: string; kilometers?: string }>({});
   
   const { user, userProfile } = useAuth();
@@ -42,6 +43,53 @@ const EmployeeAttendance: React.FC = () => {
       return userProfile.full_name;
     }
     return 'User';
+  };
+
+  // Upload image to Supabase Storage
+  const uploadImageToStorage = async (base64Image: string): Promise<string | null> => {
+    try {
+      setUploading(true);
+      
+      // Convert base64 to blob
+      const response = await fetch(base64Image);
+      const blob = await response.blob();
+      
+      // Create unique filename
+      const fileName = `attendance_${user.id}_${Date.now()}.jpg`;
+      const filePath = `attendance/${user.id}/${fileName}`;
+      
+      console.log('Uploading image to Supabase Storage...');
+      
+      // Upload to Supabase Storage
+      const { data: uploadData, error: uploadError } = await supabase.storage
+        .from('employee-photos')
+        .upload(filePath, blob, {
+          contentType: 'image/jpeg',
+          upsert: false
+        });
+
+      if (uploadError) {
+        console.error('Upload error:', uploadError);
+        throw uploadError;
+      }
+
+      console.log('Image uploaded successfully:', uploadData);
+
+      // Get public URL
+      const { data: urlData } = supabase.storage
+        .from('employee-photos')
+        .getPublicUrl(filePath);
+
+      console.log('Public URL generated:', urlData.publicUrl);
+      return urlData.publicUrl;
+
+    } catch (error) {
+      console.error('Error uploading image:', error);
+      showToast('Failed to upload image', 'error');
+      return null;
+    } finally {
+      setUploading(false);
+    }
   };
 
   const validateForm = (): boolean => {
@@ -74,6 +122,18 @@ const EmployeeAttendance: React.FC = () => {
     try {
       console.log('Submitting attendance data...');
       
+      let photoUrl = photo;
+      
+      // Upload image to Supabase Storage if it's a base64 image
+      if (photo && photo.startsWith('data:image/')) {
+        console.log('Uploading base64 image to storage...');
+        photoUrl = await uploadImageToStorage(photo);
+        
+        if (!photoUrl) {
+          throw new Error('Failed to upload image');
+        }
+      }
+      
       // Save attendance data to Supabase
       const { data, error } = await supabase
         .from('attendance')
@@ -82,7 +142,7 @@ const EmployeeAttendance: React.FC = () => {
           type: 'check_in',
           location: `Lat: ${location?.latitude}, Lng: ${location?.longitude}`,
           coordinates: location,
-          photo_url: photo,
+          photo_url: photoUrl,
           notes: `Bike reading: ${kilometers} km. Employee: ${getDisplayName()}`,
           created_at: new Date().toISOString()
         });
@@ -156,16 +216,16 @@ const EmployeeAttendance: React.FC = () => {
           
           <button
             type="submit"
-            disabled={loading}
+            disabled={loading || uploading}
             className="w-full btn btn-primary flex justify-center items-center space-x-2"
           >
-            {loading ? (
+            {(loading || uploading) ? (
               <span className="flex items-center space-x-2">
                 <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                   <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                   <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                 </svg>
-                <span>Submitting...</span>
+                <span>{uploading ? 'Uploading Image...' : 'Submitting...'}</span>
               </span>
             ) : (
               <span className="flex items-center space-x-2">

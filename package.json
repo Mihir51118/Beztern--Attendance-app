@@ -3,7 +3,8 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "start": "vite"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.3.4",
@@ -23,15 +24,20 @@
     "react-dom": "^18.2.0",
     "react-hook-form": "^7.50.0",
     "react-router-dom": "^6.22.0",
+    "react-webcam": "^7.2.0",
     "zod": "^3.22.4"
   },
   "devDependencies": {
     "@types/bcryptjs": "^2.4.6",
     "@types/crypto-js": "^4.2.1",
+    "@types/file-saver": "^2.0.7",
     "@types/react": "^18.2.55",
     "@types/react-dom": "^18.2.19",
     "@vitejs/plugin-react": "^4.2.0",
     "autoprefixer": "^10.4.17",
+    "eslint": "^8.56.0",
+    "eslint-plugin-react-hooks": "^4.6.0",
+    "eslint-plugin-react-refresh": "^0.4.5",
     "tailwindcss": "^3.4.1",
     "typescript": "^5.3.3",
     "vite": "^5.0.0"
@@ -39,8 +45,8 @@
   "name": "project-7",
   "description": "A secure internal web application for managing employee attendance and shop visits.",
   "version": "1.0.0",
-  "main": "eslint.config.js",
-  "keywords": [],
+  "main": "index.html",
+  "keywords": ["employee-management", "attendance", "shop-visits", "react", "typescript"],
   "author": "",
   "license": "ISC"
 }

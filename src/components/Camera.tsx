@@ -39,9 +39,14 @@ const CameraComponent: React.FC<CameraProps> = ({
   const [photoMetadata, setPhotoMetadata] = useState<PhotoMetadata[]>([]);
   const [switching, setSwitching] = useState<boolean>(false);
   const [capturing, setCapturing] = useState<boolean>(false);
+  const [isMobile, setIsMobile] = useState<boolean>(false);
   const { showToast } = useToast();
 
   useEffect(() => {
+    // Detect mobile device
+    const checkMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    setIsMobile(checkMobile);
+    
     const savedPreferences = localStorage.getItem('cameraPreferences');
     if (savedPreferences) {
       try {
@@ -99,15 +104,17 @@ const CameraComponent: React.FC<CameraProps> = ({
 
   const initializeCamera = async (mode: 'user' | 'environment') => {
     try {
+      // Mobile-optimized constraints
       const constraints = {
         video: {
-          facingMode: mode,
-          width: { ideal: 1920, min: 1280 },
-          height: { ideal: 1080, min: 720 }
+          facingMode: isMobile ? { ideal: mode } : mode,
+          width: isMobile ? { ideal: 720, max: 1280 } : { ideal: 1920, min: 1280 },
+          height: isMobile ? { ideal: 480, max: 720 } : { ideal: 1080, min: 720 },
+          aspectRatio: isMobile ? 4/3 : 16/9
         }
       };
 
-      console.log('🎥 Initializing camera with mode:', mode);
+      console.log('🎥 Initializing camera with mode:', mode, 'Mobile:', isMobile);
       const mediaStream = await navigator.mediaDevices.getUserMedia(constraints);
       
       if (videoRef.current) {
@@ -129,6 +136,27 @@ const CameraComponent: React.FC<CameraProps> = ({
       return true;
     } catch (error) {
       console.error('❌ Error initializing camera:', error);
+      
+      // Fallback for mobile devices
+      if (isMobile) {
+        try {
+          console.log('🔄 Trying fallback camera constraints...');
+          const fallbackStream = await navigator.mediaDevices.getUserMedia({
+            video: { facingMode: mode }
+          });
+          
+          if (videoRef.current) {
+            videoRef.current.srcObject = fallbackStream;
+          }
+          
+          setStream(fallbackStream);
+          setCameraActive(true);
+          return true;
+        } catch (fallbackError) {
+          console.error('❌ Fallback camera failed:', fallbackError);
+        }
+      }
+      
       return false;
     }
   };
@@ -146,7 +174,7 @@ const CameraComponent: React.FC<CameraProps> = ({
         throw new Error('Failed to initialize camera');
       }
     } catch (error) {
-      showToast('Camera access denied or not available', 'error');
+      showToast('Camera access denied or not available. Please check permissions and ensure you\'re using HTTPS.', 'error');
       console.error('❌ Error accessing camera:', error);
     }
   };
@@ -349,6 +377,7 @@ const CameraComponent: React.FC<CameraProps> = ({
             {/* Camera info overlay */}
             <div className="absolute top-3 left-3 bg-black bg-opacity-60 text-white px-3 py-1 rounded-lg text-sm">
               📷 {facingMode === 'user' ? 'Front Camera' : 'Back Camera'}
+              {isMobile && <span className="ml-2">📱</span>}
             </div>
             
             {/* Camera controls */}
@@ -398,6 +427,25 @@ const CameraComponent: React.FC<CameraProps> = ({
               <Camera className="w-5 h-5" />
               <span>Start Camera</span>
             </button>
+            
+            {isMobile && (
+              <div className="mt-4 p-3 bg-blue-50 rounded-lg">
+                <p className="text-xs text-blue-600">
+                  📱 Mobile device detected - optimized camera settings applied
+                </p>
+                <p className="text-xs text-blue-500 mt-1">
+                  💡 For best results, ensure you're using HTTPS
+                </p>
+              </div>
+            )}
+            
+            {!window.isSecureContext && (
+              <div className="mt-4 p-3 bg-yellow-50 rounded-lg">
+                <p className="text-xs text-yellow-600">
+                  ⚠️ Camera requires HTTPS for security. Use HTTPS=true npm start for development.
+                </p>
+              </div>
+            )}
           </div>
         )}
       </div>
