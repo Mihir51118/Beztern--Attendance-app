@@ -93,6 +93,39 @@ const LoginPage: React.FC = () => {
     return Object.keys(errors).length === 0;
   };
 
+  // Function to find email from username or phone
+  const findUserEmail = async (identifier: string): Promise<string | null> => {
+    try {
+      // Check if it's already an email
+      const isEmail = /^\S+@\S+\.\S+$/.test(identifier);
+      if (isEmail) {
+        return identifier;
+      }
+
+      // Look up user by username or phone in profiles table
+      const { data: profile, error } = await supabase
+        .from('profiles')
+        .select('email')
+        .or(`username.eq.${identifier},phone.eq.${identifier}`)
+        .maybeSingle();
+
+      if (error) {
+        console.error('Error looking up user:', error);
+        return null;
+      }
+
+      if (profile && profile.email) {
+        console.log('Found user email for identifier:', identifier);
+        return profile.email;
+      }
+
+      return null;
+    } catch (error) {
+      console.error('Error in findUserEmail:', error);
+      return null;
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!validateForm()) {
@@ -102,14 +135,22 @@ const LoginPage: React.FC = () => {
     setLoading(true);
     
     try {
-      // Determine if the identifier is an email
-      const isEmail = /^\S+@\S+\.\S+$/.test(identifier);
+      console.log(`Attempting login with identifier: ${identifier}`);
       
-      console.log(`Attempting login with ${isEmail ? 'email' : 'identifier'}: ${identifier}`);
+      // Find the actual email for the identifier
+      const email = await findUserEmail(identifier.trim());
       
-      // Authenticate with Supabase
+      if (!email) {
+        showToast('User not found. Please check your credentials.', 'error');
+        setLoading(false);
+        return;
+      }
+
+      console.log(`Found email for identifier: ${email}`);
+      
+      // Authenticate with Supabase using the found email
       const { data, error } = await supabase.auth.signInWithPassword({
-        email: isEmail ? identifier : `${identifier}@placeholder.com`,
+        email: email,
         password: password,
         options: {
           persistSession: rememberMe
@@ -119,7 +160,9 @@ const LoginPage: React.FC = () => {
       if (error) {
         console.error('Authentication error:', error);
         if (error.message.includes('Invalid login')) {
-          showToast('Invalid email/username or password', 'error');
+          showToast('Invalid credentials. Please check your password.', 'error');
+        } else if (error.message.includes('Email not confirmed')) {
+          showToast('Please verify your email before logging in. Check your inbox.', 'error');
         } else {
           showToast(error.message || 'Authentication failed', 'error');
         }
@@ -171,6 +214,10 @@ const LoginPage: React.FC = () => {
         provider: 'google',
         options: {
           redirectTo: `${window.location.origin}/auth/callback`,
+          queryParams: {
+            access_type: 'offline',
+            prompt: 'consent',
+          }
         },
       });
       
